@@ -1,0 +1,241 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Dashboard - Smecen{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Statistics Cards -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Total Sales</h6>
+                        <h4 class="mb-0">${{ total_sales|default:"0.00" }}</h4>
+                        <small class="text-success">
+                            <i class='bx bx-up-arrow-alt'></i> 8.2% from last month
+                        </small>
+                    </div>
+                    <div class="icon-box bg-light-primary">
+                        <i class='bx bx-dollar text-primary'></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Total Expenses</h6>
+                        <h4 class="mb-0">${{ total_expenses|default:"0.00" }}</h4>
+                        <small class="text-danger">
+                            <i class='bx bx-down-arrow-alt'></i> 3.1% from last month
+                        </small>
+                    </div>
+                    <div class="icon-box bg-light-danger">
+                        <i class='bx bx-wallet text-danger'></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Total Customers</h6>
+                        <h4 class="mb-0">{{ total_customers|default:"0" }}</h4>
+                        <small class="text-success">
+                            <i class='bx bx-up-arrow-alt'></i> 12.5% from last month
+                        </small>
+                    </div>
+                    <div class="icon-box bg-light-success">
+                        <i class='bx bx-user text-success'></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Pending Orders</h6>
+                        <h4 class="mb-0">{{ pending_orders|default:"0" }}</h4>
+                        <small class="text-warning">
+                            <i class='bx bx-time'></i> Needs attention
+                        </small>
+                    </div>
+                    <div class="icon-box bg-light-warning">
+                        <i class='bx bx-cart text-warning'></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Sales Chart -->
+    <div class="col-xl-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Sales Overview</h5>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        This Month
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">This Week</a></li>
+                        <li><a class="dropdown-item" href="#">This Month</a></li>
+                        <li><a class="dropdown-item" href="#">This Year</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas class="chart" data-type="line" data-data='{{ sales_chart_data|safe }}' height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="col-xl-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Activities</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="activity-list">
+                    {% for activity in recent_activities %}
+                    <div class="activity-item d-flex align-items-center p-3 border-bottom">
+                        <div class="activity-icon me-3">
+                            <i class='bx {{ activity.icon }} text-{{ activity.color }}'></i>
+                        </div>
+                        <div class="activity-content flex-grow-1">
+                            <p class="mb-0">{{ activity.description }}</p>
+                            <small class="text-muted">{{ activity.created_at|timesince }} ago</small>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="p-3 text-center text-muted">
+                        No recent activities
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Orders -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Orders</h5>
+                <a href="{% url 'sales:orders' %}" class="btn btn-primary btn-sm">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover datatable">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td>{{ order.order_number }}</td>
+                                <td>{{ order.customer.name }}</td>
+                                <td>{{ order.order_date }}</td>
+                                <td>${{ order.total_amount }}</td>
+                                <td>
+                                    <span class="badge bg-{{ order.status_color }}">{{ order.get_status_display }}</span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'sales:order_detail' order.id %}" class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No orders found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .icon-box i {
+        font-size: 24px;
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .activity-icon i {
+        font-size: 20px;
+    }
+
+    .bg-light-primary {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+
+    .bg-light-success {
+        background-color: rgba(25, 135, 84, 0.1);
+    }
+
+    .bg-light-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+
+    .bg-light-danger {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap5.min.js"></script>
+{% endblock %} 
