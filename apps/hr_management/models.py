@@ -4,8 +4,9 @@ from django.utils.translation import gettext_lazy as _
 
 class Employee(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    employee_id = models.CharField(max_length=20, unique=True)
-    designation = models.CharField(max_length=100)
+    employee_id = models.CharField(max_length=10, unique=True)
+    department = models.CharField(max_length=100)
+    position = models.CharField(max_length=100)
     joining_date = models.DateField()
     salary = models.DecimalField(max_digits=10, decimal_places=2)
     emergency_contact = models.CharField(max_length=15, blank=True)
@@ -23,18 +24,25 @@ class LeaveType(models.Model):
         return self.name
 
 class LeaveRequest(models.Model):
-    STATUS_CHOICES = (
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
+    LEAVE_TYPES = (
+        ('Annual', 'Annual Leave'),
+        ('Sick', 'Sick Leave'),
+        ('Personal', 'Personal Leave'),
+        ('Other', 'Other'),
     )
-
+    
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
+    )
+    
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    leave_type = models.ForeignKey(LeaveType, on_delete=models.CASCADE)
     start_date = models.DateField()
     end_date = models.DateField()
+    leave_type = models.CharField(max_length=20, choices=LEAVE_TYPES)
     reason = models.TextField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     approved_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -64,7 +72,7 @@ class Attendance(models.Model):
 
 class Document(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=200)
     document = models.FileField(upload_to='employee_documents/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
     notes = models.TextField(blank=True)

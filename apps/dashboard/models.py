@@ -2,6 +2,8 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
+# Dashboard models will be added here
+
 class DashboardWidget(models.Model):
     WIDGET_TYPES = (
         ('sales_summary', 'Sales Summary'),
